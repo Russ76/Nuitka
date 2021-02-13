@@ -72,6 +72,7 @@ hard_modules = frozenset(
 
 trust_constant = 1
 trust_exist = 2
+trust_future = trust_exist
 
 hard_modules_trust = {
     "os": {},
@@ -83,6 +84,24 @@ hard_modules_trust = {
     "_frozen_importlib": {},
     "_frozen_importlib_external": {},
 }
+
+hard_modules_trust["__future__"] = {
+    "unicode_literals": trust_future,
+    "absolute_import": trust_future,
+    "division": trust_future,
+    "print_function": trust_future,
+    "generator_stop": trust_future,
+    "nested_scopes": trust_future,
+    "generators": trust_future,
+    "with_statement": trust_future,
+}
+
+import __future__
+
+if hasattr(__future__, "barry_as_FLUFL"):
+    hard_modules_trust["__future__"]["barry_as_FLUFL"] = trust_future
+if hasattr(__future__, "annotations"):
+    hard_modules_trust["__future__"]["annotations"] = trust_future
 
 
 def isHardModuleWithoutSideEffect(module_name):
@@ -147,6 +166,11 @@ class ExpressionImportModuleHard(ExpressionBase):
             trace_collection.onExceptionRaiseExit(BaseException)
 
         return self, None, None
+
+    def computeExpressionImportName(self, import_node, import_name, trace_collection):
+        return self.computeExpressionAttribute(
+            import_node, import_name, trace_collection
+        )
 
     def computeExpressionAttribute(self, lookup_node, attribute_name, trace_collection):
         # By default, an attribute lookup may change everything about the lookup
